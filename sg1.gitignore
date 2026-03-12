@@ -1,0 +1,7 @@
+__pycache__/
+*.o
+*.so
+*.exe
+data/raw_genome/
+results/
+.ipynb_checkpoints/
