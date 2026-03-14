@@ -1,12 +1,12 @@
-# SG1
+# SG1 SENTINEL
 High-speed bit-packed CUDA engine for genetic circuit orthogonality.
-# SG1: High-Speed Bit-Packed CUDA Engine for Synthetic Biology
+# SG1: SENTINEL High-Speed Bit-Packed CUDA Engine for Synthetic Biology
 
 **Developed by:** Sumathi Genomics Co., Ltd. (Thailand) & Saminathan Industries Pte. Ltd. (Singapore)  
 **Lead Researcher:** Dr. Saminathan Sivaprakasham Murugesan (saminathan@u.nus.edu)
 
 ## Overview
-SG1 is a hardware-accelerated "Biological Design Rule Checker" (DRC). It utilizes 2-bit DNA vectorization and NVIDIA CUDA kernels to perform ultra-fast orthogonality verification and cross-talk analysis for synthetic genetic circuits.
+SG1 SENTINEL is a hardware-accelerated "Biological Design Rule Checker" (DRC). It utilizes 2-bit DNA vectorization and NVIDIA CUDA kernels to perform ultra-fast orthogonality verification and cross-talk analysis for synthetic genetic circuits.
 
 ## Key Features
 * **Bit-Packed DNA Encoding:** Reduces genomic footprint by 75%, enabling entire host genomes to reside in GPU L2 cache.
