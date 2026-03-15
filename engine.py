@@ -1,9 +1,42 @@
+from pathlib import Path
+
 import cupy as cp
 import numpy as np
 
+
+MASK_2BIT = np.uint64(0x5555555555555555)
+
+
+def sg1_mismatch_distance(block_a, block_b):
+    """Return SG1 mismatch distance for two packed 64-bit DNA blocks."""
+    diff = np.uint64(block_a) ^ np.uint64(block_b)
+    norm = (diff | (diff >> np.uint64(1))) & MASK_2BIT
+    return int(norm.bit_count())
+
+
+def check_orthogonality_cpu(circuit_bits, query_bits, max_m=5):
+    """Reference CPU implementation for validation and non-GPU environments."""
+    circuit = np.asarray(circuit_bits, dtype=np.uint64)
+    queries = np.asarray(query_bits, dtype=np.uint64)
+
+    out = np.full((len(queries), len(circuit)), -1, dtype=np.int32)
+    for q_idx, q in enumerate(queries):
+        for c_idx, c in enumerate(circuit):
+            dist = sg1_mismatch_distance(q, c)
+            if dist <= max_m:
+                out[q_idx, c_idx] = dist
+    return out
+
 class SG1Engine:
     def __init__(self, kernel_path="sg1_kernel.cu"):
-        with open(kernel_path, 'r') as f:
+        root = Path(__file__).resolve().parent
+        candidate = Path(kernel_path)
+        if not candidate.exists():
+            candidate = root / kernel_path
+        if not candidate.exists():
+            raise FileNotFoundError(f"CUDA kernel file not found: {kernel_path}")
+
+        with open(candidate, 'r', encoding='utf-8') as f:
             self.module = cp.RawModule(code=f.read())
         self.kernel = self.module.get_function("sg1_orthogonality_kernel")
 
@@ -21,7 +54,7 @@ class SG1Engine:
         grid = ((num_c + 15) // 16, (num_q + 15) // 16)
 
         self.kernel(grid, threads, (d_circuit, d_queries, d_results, num_c, num_q, max_m))
-        
+
         return cp.asnumpy(d_results)
 
 # Example SynBio Usage
