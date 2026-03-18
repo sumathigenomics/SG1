@@ -15,18 +15,26 @@ SG1 SENTINEL is a hardware-accelerated "Biological Design Rule Checker" (DRC). I
 * **Sub-second Latency:** Full human genome (GRCh38) scans in <800ms.
 
 ## Core Logic (The SG1 Transform)
-To ensure 1:1 biological fidelity in a 2-bit space, SG1 uses the following bitwise operation:
-`V = (X ^ (X >> 1)) & 0x5555555555555555;`
-`mismatches = __popcll(V);`
+For each query-component pair, SG1 computes a 2-bit Hamming distance using three bitwise steps:
+
+```c
+uint64_t diff = query ^ component;               // 1. XOR: mark differing bits
+uint64_t norm = (diff | (diff >> 1)) & 0x5555555555555555ULL; // 2. Collapse each 2-bit pair to its LSB
+int mismatches = __popcll(norm);                 // 3. Count differing base pairs
+```
+
+- Step 1: XOR isolates positions where query and component differ.
+- Step 2: OR with a right-shift ensures that if either bit in a 2-bit base pair differs, the LSB of that pair is set. The mask `0x5555...` isolates only those LSBs.
+- Step 3: Popcount gives the total number of mismatched base pairs.
 
 ## Getting Started
 ### Prerequisites
 * NVIDIA GPU (Compute Capability 8.0+)
 * CUDA Toolkit 11.8+
-* Python 3.9+ / CuPy
+* Python 3.9+ / CuPy (falls back to CPU/NumPy if no GPU is available)
 
 ### Installation
 ```bash
-git clone [https://github.com/SumathiGenomics/SG1.git](https://github.com/SumathiGenomics/SG1.git)
-cd SG1
+git clone https://github.com/sumathigenomics/SG1_SENTINEL.git
+cd SG1_SENTINEL
 pip install -r requirements.txt
